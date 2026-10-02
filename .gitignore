@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 录制 / 抓拍产生的临时文件
+*.wav
+*.mp3
+
+# 系统
+.DS_Store
+Thumbs.db
+desktop.ini
