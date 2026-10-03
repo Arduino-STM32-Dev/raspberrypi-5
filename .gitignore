@@ -9,6 +9,11 @@ venv/
 *.wav
 *.mp3
 
+# 环境变量 / 密钥（切勿提交 API Key）
+.env
+.env.*
+!.env.example
+
 # 系统
 .DS_Store
 Thumbs.db

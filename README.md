@@ -18,6 +18,14 @@
 | 系统能进，但 SSH 连不上 | **3.3** 与 **4.3** |
 | `pip install` 报错 | **4.4** 与 **第八章附录 B** |
 | 只想抄命令 | **第七章 命令速查** |
+| 基础环境已好，要跑本地大模型 | 转去看 **[ollama-deepseek-local.md](ollama-deepseek-local.md)** |
+
+### 本仓库的文档分工
+
+| 文档 | 内容 | 适用阶段 |
+| :--- | :--- | :--- |
+| **README.md**（本文） | 系统刷写、Headless SSH、换源、摄像头、声卡、故障排查 | 第一步：把硬件和系统跑通 |
+| **[ollama-deepseek-local.md](ollama-deepseek-local.md)** | Ollama 手动安装、编译 `llama-server`、DeepSeek-R1 模型与 API 调用 | 第二步：在本机跑起大模型 |
 
 **核心结论先给**：树莓派 5 部署大模型的失败，**十次里有八次不是软件问题，而是供电和散热问题**。请把这句话记在心里，它会在下文的每个环节救你一次。
 
@@ -347,7 +355,7 @@ sudo apt install python3-speechrecognition python3-pyaudio flac -y
 **各环节要点**：
 
 - **ASR**：录音用 `arecord -D plughw:2,0`，务必显式指定 card 号（见 3.6）；
-- **大模型**：本地用 **Ollama**（需评估树莓派 5 内存与模型量化级别），或调用联网 API；
+- **大模型**：本地用 **Ollama**（推荐 `deepseek-r1:1.5b`，树莓派 5 上 4GB 内存即可运行），或调用联网 API —— 完整安装步骤与 10 个坑见 **[ollama-deepseek-local.md](ollama-deepseek-local.md)**；
 - **TTS**：输出到 `card 2` 扬声器；注意做好「录音」与「放音」的互斥，否则会自激啸叫。
 
 ---
@@ -467,7 +475,8 @@ scp pi@<树莓派IP>:~/test2.jpg .
 
 ```text
 raspberrypi-5/
-├── README.md                        # 本指南：环境搭建 + 故障排查 + 命令速查
+├── README.md                        # 本指南：基础环境搭建 + 故障排查 + 命令速查
+├── ollama-deepseek-local.md         # 续篇：Ollama + DeepSeek-R1 本地大模型部署
 └── image-and-video/
     ├── raspberrypi-5.jpg            # 整机外观（铝合金外壳 + 网线接入）
     ├── recorder-and-camera.jpg      # 视觉与语音模块实拍（USB 摄像头 + 麦克风阵列）
@@ -475,3 +484,5 @@ raspberrypi-5/
 ```
 
 > 后续若补充视频流、LLaVA、Vosk 的具体实现，会在 `scripts/` 与 `docs/` 目录下继续完善。
+>
+> **下一步阅读**：基础环境打通后，请继续阅读 **[ollama-deepseek-local.md](ollama-deepseek-local.md)**，在本机把 DeepSeek-R1 小模型跑起来并对外提供 API。
