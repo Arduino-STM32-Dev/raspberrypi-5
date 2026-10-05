@@ -9,6 +9,11 @@ venv/
 *.wav
 *.mp3
 
+# 下载的模型包与解压目录（体积大，不入库）
+*.tar.bz2
+*.tar.zst
+sherpa-onnx-*/
+
 # 环境变量 / 密钥（切勿提交 API Key）
 .env
 .env.*

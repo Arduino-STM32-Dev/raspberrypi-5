@@ -19,13 +19,18 @@
 | `pip install` 报错 | **4.4** 与 **第八章附录 B** |
 | 只想抄命令 | **第七章 命令速查** |
 | 基础环境已好，要跑本地大模型 | 转去看 **[ollama-deepseek-local.md](ollama-deepseek-local.md)** |
+| 想直接做出能用的助手应用 | 转去看 **[multimodal-assistant.md](multimodal-assistant.md)** |
 
 ### 本仓库的文档分工
 
 | 文档 | 内容 | 适用阶段 |
 | :--- | :--- | :--- |
 | **README.md**（本文） | 系统刷写、Headless SSH、换源、摄像头、声卡、故障排查 | 第一步：把硬件和系统跑通 |
-| **[ollama-deepseek-local.md](ollama-deepseek-local.md)** | Ollama 手动安装、编译 `llama-server`、DeepSeek-R1 模型与 API 调用 | 第二步：在本机跑起大模型 |
+| **[ollama-deepseek-local.md](ollama-deepseek-local.md)** | Ollama 手动安装、编译 `llama-server`、DeepSeek-R1 模型与 API 调用 | 第二步：验证本地推理能力 |
+| **[multimodal-assistant.md](multimodal-assistant.md)** | 多模态桌面助手：架构设计、两个脚本解析、踩坑复盘、面向 AI 辅助工业控制的演进路线 | 第三步：做出可用的应用 |
+
+> 🎯 **推荐路径**：先把硬件和系统跑通（本文）→ 理解本地推理的边界（ollama 篇）
+> → 做出真正能用的多模态助手（**multimodal-assistant 篇**，含完整代码与避坑指南）。
 
 **核心结论先给**：树莓派 5 部署大模型的失败，**十次里有八次不是软件问题，而是供电和散热问题**。请把这句话记在心里，它会在下文的每个环节救你一次。
 
@@ -337,6 +342,11 @@ sudo apt install python3-speechrecognition python3-pyaudio flac -y
 
 > ⚠️ **重要认知**：网上大量树莓派语音教程直接调用 `recognize_google`，**在国内网络环境下会长时间卡住直至超时**。请**一开始就规划离线方案（Vosk）**，不要等踩坑之后再改架构。
 
+> ✅ **本仓库已给出实际落地方案**：在真正做多模态助手时，我们最终选了
+> **阿里云百炼 `qwen3-asr-flash`** 做语音识别（支持本地文件直传），
+> **`sherpa-onnx` 做本地离线 TTS**。完整选型理由与踩坑记录见
+> **[multimodal-assistant.md](multimodal-assistant.md)**。
+
 ### 5.3 完整链路：语音 → 大模型 → 语音
 
 ```text
@@ -475,14 +485,19 @@ scp pi@<树莓派IP>:~/test2.jpg .
 
 ```text
 raspberrypi-5/
-├── README.md                        # 本指南：基础环境搭建 + 故障排查 + 命令速查
-├── ollama-deepseek-local.md         # 续篇：Ollama + DeepSeek-R1 本地大模型部署
+├── README.md                        # ① 基础环境搭建 + 故障排查 + 命令速查
+├── ollama-deepseek-local.md         # ② 本地大模型：Ollama + DeepSeek-R1 部署
+├── multimodal-assistant.md          # ③ 多模态助手：架构 + 代码解析 + 踩坑 + 工业控制路线
+├── voice_assistant.py               # 语音对话脚本（ASR + LLM + 本地离线 TTS）
+├── vision_tts.py                    # 视觉识别脚本（拍照 + VLM + 语音播报）
+├── .env.example                     # API Key 与设备参数模板（复制为 .env 使用）
 └── image-and-video/
     ├── raspberrypi-5.jpg            # 整机外观（铝合金外壳 + 网线接入）
     ├── recorder-and-camera.jpg      # 视觉与语音模块实拍（USB 摄像头 + 麦克风阵列）
     └── Solve-problem.jpg            # Headless 模式（ssh / userconf.txt）配置参考
 ```
 
-> 后续若补充视频流、LLaVA、Vosk 的具体实现，会在 `scripts/` 与 `docs/` 目录下继续完善。
->
-> **下一步阅读**：基础环境打通后，请继续阅读 **[ollama-deepseek-local.md](ollama-deepseek-local.md)**，在本机把 DeepSeek-R1 小模型跑起来并对外提供 API。
+> **下一步阅读**：
+> 基础环境打通后，先看 **[ollama-deepseek-local.md](ollama-deepseek-local.md)** 理解本地推理的边界，
+> 再进入 **[multimodal-assistant.md](multimodal-assistant.md)** 做出真正能用的多模态助手
+> （含 [voice_assistant.py](voice_assistant.py) 与 [vision_tts.py](vision_tts.py) 的完整解析与全部避坑记录）。
