@@ -29,7 +29,6 @@
 | **README.md**（本文） | 系统刷写、Headless SSH、换源、摄像头、声卡、故障排查 | 第一步：把硬件和系统跑通 |
 | **[ollama-deepseek-local.md](ollama-deepseek-local.md)** | Ollama 手动安装、编译 `llama-server`、DeepSeek-R1 模型与 API 调用 | 第二步：验证本地推理能力 |
 | **[multimodal-assistant.md](multimodal-assistant.md)** | 多模态桌面助手：架构设计、两个脚本解析、踩坑复盘、面向 AI 辅助工业控制的演进路线 | 第三步：做出可用的应用 |
-| 想做温湿度看板 / 语音控制设备 | 转去看 **[iot-dashboard.md](iot-dashboard.md)** |
 
 > 🎯 **推荐路径**：先把硬件和系统跑通（本文）→ 理解本地推理的边界（ollama 篇）
 > → 做出真正能用的多模态助手（**multimodal-assistant 篇**，含完整代码与避坑指南）。
@@ -348,7 +347,6 @@ sudo apt install python3-speechrecognition python3-pyaudio flac -y
 > **阿里云百炼 `qwen3-asr-flash`** 做语音识别（支持本地文件直传），
 > **`sherpa-onnx` 做本地离线 TTS**。完整选型理由与踩坑记录见
 > **[multimodal-assistant.md](multimodal-assistant.md)**。
-| 想做温湿度看板 / 语音控制设备 | 转去看 **[iot-dashboard.md](iot-dashboard.md)** |
 
 ### 5.3 完整链路：语音 → 大模型 → 语音
 
@@ -503,5 +501,4 @@ raspberrypi-5/
 > **下一步阅读**：
 > 基础环境打通后，先看 **[ollama-deepseek-local.md](ollama-deepseek-local.md)** 理解本地推理的边界，
 > 再进入 **[multimodal-assistant.md](multimodal-assistant.md)** 做出真正能用的多模态助手
-| 想做温湿度看板 / 语音控制设备 | 转去看 **[iot-dashboard.md](iot-dashboard.md)** |
 > （含 [voice_assistant.py](voice_assistant.py) 与 [vision_tts.py](vision_tts.py) 的完整解析与全部避坑记录）。
