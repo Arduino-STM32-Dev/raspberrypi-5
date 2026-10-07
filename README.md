@@ -21,6 +21,7 @@
 | 基础环境已好，要跑本地大模型 | 转去看 **[ollama-deepseek-local.md](ollama-deepseek-local.md)** |
 | 想直接做出能用的助手应用 | 转去看 **[multimodal-assistant.md](multimodal-assistant.md)** |
 | 想做温湿度看板 / 语音控制设备 | 转去看 **[iot-dashboard.md](iot-dashboard.md)** |
+| 想做手势控制设备 | 转去看 **[gesture-fan-control.md](gesture-fan-control.md)** |
 
 ### 本仓库的文档分工
 
