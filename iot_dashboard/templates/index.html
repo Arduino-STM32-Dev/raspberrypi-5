@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>物联网监控看板</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 16px;
+  }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  h1 { font-size: 22px; font-weight: 600; }
+  .status { font-size: 13px; padding: 6px 12px; border-radius: 999px; background: #1e293b; }
+  .status.on { color: #4ade80; } .status.off { color: #f87171; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .status.on .dot { background: #4ade80; } .status.off .dot { background: #f87171; }
+
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .card {
+    background: #1e293b; border-radius: 14px; padding: 18px; text-align: center;
+  }
+  .card .label { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
+  .card .value { font-size: 40px; font-weight: 700; }
+  .card .unit { font-size: 16px; color: #94a3b8; }
+  .temp .value { color: #fb923c; } .humi .value { color: #38bdf8; } .fan .value { color: #34d399; }
+
+  .chart-box { background: #1e293b; border-radius: 14px; padding: 10px; margin-bottom: 16px; }
+  #chart { width: 100%; height: 320px; }
+
+  .controls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .btn {
+    border: none; border-radius: 12px; padding: 16px 0; font-size: 15px; font-weight: 600;
+    color: #0f172a; cursor: pointer; transition: transform .05s, opacity .15s;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn.on  { background: #facc15; }   /* 开灯 */
+  .btn.off { background: #64748b; color: #fff; }  /* 关灯 */
+  .btn.fan-on  { background: #34d399; }
+  .btn.fan-off { background: #64748b; color: #fff; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #334155; color: #fff; padding: 10px 20px; border-radius: 10px;
+    font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🏠 物联网监控看板</h1>
+    <div class="status off" id="status"><span class="dot"></span>连接中…</div>
+  </header>
+
+  <div class="cards">
+    <div class="card temp">
+      <div class="label">🌡️ 温度</div>
+      <div class="value"><span id="temp">--</span><span class="unit"> °C</span></div>
+    </div>
+    <div class="card humi">
+      <div class="label">💧 湿度</div>
+      <div class="value"><span id="humi">--</span><span class="unit"> %</span></div>
+    </div>
+    <div class="card fan">
+      <div class="label">🌀 风扇</div>
+      <div class="value"><span id="fan">--</span></div>
+    </div>
+  </div>
+
+  <div class="chart-box"><div id="chart"></div></div>
+
+  <div class="controls">
+    <button class="btn fan-on" id="fan-on">🌀 开风扇</button>
+    <button class="btn fan-off" id="fan-off">⏹️ 关风扇</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const chart = echarts.init(document.getElementById('chart'));
+  const opt = {
+    backgroundColor: 'transparent',
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['温度', '湿度'], textStyle: { color: '#94a3b8' } },
+    grid: { left: 40, right: 40, top: 40, bottom: 28 },
+    xAxis: {
+      type: 'time',
+      axisLine: { lineStyle: { color: '#334155' } },
+      axisLabel: { color: '#94a3b8' },
+    },
+    yAxis: [
+      { type: 'value', name: '温度(°C)', nameTextStyle: { color: '#fb923c' },
+        axisLabel: { color: '#94a3b8' }, splitLine: { lineStyle: { color: '#1e293b' } } },
+      { type: 'value', name: '湿度(%)', nameTextStyle: { color: '#38bdf8' },
+        axisLabel: { color: '#94a3b8' }, splitLine: { show: false } },
+    ],
+    series: [
+      { name: '温度', type: 'line', showSymbol: false, smooth: true,
+        data: [], lineStyle: { color: '#fb923c' } },
+      { name: '湿度', type: 'line', yAxisIndex: 1, showSymbol: false, smooth: true,
+        data: [], lineStyle: { color: '#38bdf8' } },
+    ],
+  };
+  chart.setOption(opt);
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  function setStatus(ok) {
+    const s = document.getElementById('status');
+    s.className = 'status ' + (ok ? 'on' : 'off');
+    s.innerHTML = '<span class="dot"></span>' + (ok ? 'MQTT 已连接' : 'MQTT 未连接');
+  }
+
+  async function refresh() {
+    try {
+      const [hist, latest, st] = await Promise.all([
+        fetch('/api/history?limit=300').then(r => r.json()),
+        fetch('/api/latest').then(r => r.json()),
+        fetch('/api/status').then(r => r.json()),
+      ]);
+      setStatus(st.mqtt_connected);
+
+      if (latest.temperature != null) document.getElementById('temp').textContent = latest.temperature;
+      if (latest.humidity != null) document.getElementById('humi').textContent = latest.humidity;
+      if (latest.fan != null) document.getElementById('fan').textContent = (latest.fan == 1 ? '开' : '关');
+      chart.setOption({
+        series: [
+          { data: hist.map(p => [p.ts, p.temperature]) },
+          { data: hist.map(p => [p.ts, p.humidity]) },
+        ],
+      });
+    } catch (e) {
+      setStatus(false);
+    }
+  }
+
+  async function sendCmd(device, action, label) {
+    try {
+      const r = await fetch('/api/command', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device, action }),
+      });
+      const j = await r.json();
+      showToast(j.ok ? '✅ ' + label + ' 指令已发送' : '⚠️ 发送失败');
+    } catch (e) {
+      showToast('⚠️ 网络错误');
+    }
+  }
+
+  document.getElementById('fan-on').onclick  = () => sendCmd('fan', 'on', '开风扇');
+  document.getElementById('fan-off').onclick = () => sendCmd('fan', 'off', '关风扇');
+
+  refresh();
+  setInterval(refresh, 3000);
+  window.addEventListener('resize', () => chart.resize());
+</script>
+</body>
+</html>
