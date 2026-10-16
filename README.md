@@ -24,6 +24,7 @@
 | 想做手势控制设备 | 转去看 **[gesture-fan-control.md](gesture-fan-control.md)** |
 | 想在 ARM64 上本地构建 Android APK | 转去看 **[android-arm64-local-build.md](android-arm64-local-build.md)** |
 | 想做工业级监控看板（Grafana + 舵机阀门）| 转去看 **[industrial-upgrade.md](industrial-upgrade.md)** |
+| 想做 PID 平滑温控（PWM 下发 + 曲线）| 转去看 **[pid-temperature-control.md](pid-temperature-control.md)** |
 
 ### 本仓库的文档分工
 
